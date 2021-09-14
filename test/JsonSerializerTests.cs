@@ -48,7 +48,7 @@ namespace Serde.Test
         }
 
         [Fact]
-        public void TestEnumerable()
+        public void SerializeEnumerable()
         {
             var src = new JsonArray(ImmutableArray.Create<JsonNode>(
                 1,
@@ -60,6 +60,17 @@ namespace Serde.Test
   1,
   2
 ]");
+        }
+
+        [Fact]
+        public void DeserializeEnumerable()
+        {
+            var src = @"[ 1, 2 ]";
+            var result = Serde.Json.JsonSerializer.Deserialize<JsonNode, JsonNode.DeserializeProxy>(src);
+            Assert.Equal(new JsonArray(new JsonNode[] {
+                new JsonNumber(1),
+                new JsonNumber(2)
+            }), result);
         }
 
         [Fact]

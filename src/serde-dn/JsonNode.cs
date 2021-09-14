@@ -1,13 +1,15 @@
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Serde.Test")]
 
 namespace Serde.Test
 {
-    internal abstract record JsonNode : ISerializeStatic
+    internal abstract partial record JsonNode : ISerializeStatic
     {
         private protected JsonNode() { }
 
@@ -90,11 +92,37 @@ namespace Serde.Test
             type.End();
         }
     }
-    internal record JsonArray(ImmutableArray<JsonNode> Elements) : JsonNode
+    internal sealed record JsonArray(ImmutableArray<JsonNode> Elements) : JsonNode
     {
         public JsonArray(IEnumerable<JsonNode> elements)
             : this(elements.ToImmutableArray())
         { }
+
+        public bool Equals(JsonArray? other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            foreach (var (a, b) in Elements.Zip(other.Elements))
+            {
+                if (!a.Equals(b)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 0;
+            foreach (var e in Elements)
+            {
+                hash = HashCode.Combine(hash, e);
+            }
+            return hash;
+        }
 
         public override void Serialize<TSerializer, TSerializeType, TSerializeEnumerable, TSerializeDictionary>(ref TSerializer serializer)
         {

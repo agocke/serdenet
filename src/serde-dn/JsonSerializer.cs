@@ -34,6 +34,13 @@ namespace Serde.Json
             writer.Flush();
             return Encoding.UTF8.GetString(bufferWriter.WrittenMemory.Span);
         }
+
+        public static T Deserialize<T, TProxy>(string source)
+            where TProxy : struct, IDeserialize<T>
+        {
+            var de = JsonDeserializer.FromString(source);
+            return default(TProxy).Deserialize(de);
+        }
     }
 
     // Implementations of ISerializer interfaces
