@@ -101,26 +101,27 @@ namespace Serde.Json
 
         private readonly struct DeEnumerable : IDeserializeEnumerable
         {
-            private readonly JsonDeserializer _jsDeserializer;
+            private readonly JsonDeserializer _deserializer;
             public DeEnumerable(JsonDeserializer de)
             {
-                _jsDeserializer = de;
+                _deserializer = de;
             }
             public int? SizeOpt => null;
 
-            public bool TryGetNext<T>(IDeserialize<T> deserialize, [MaybeNullWhen(false)] out T next)
+            public bool TryGetNext<T, D>(D deserialize, [MaybeNullWhen(false)] out T next)
+                where D : IDeserialize<T>
             {
-                var reader = _jsDeserializer.GetReader();
+                var reader = _deserializer.GetReader();
                 // Check if the next token is the end of the array, but don't advance the stream if not
                 reader.ReadOrThrow();
                 if (reader.TokenType == JsonTokenType.EndArray)
                 {
-                    _jsDeserializer.SaveState(reader);
+                    _deserializer.SaveState(reader);
                     next = default;
                     return false;
                 }
                 // Don't save state
-                next = deserialize.Deserialize(_jsDeserializer);
+                next = deserialize.Deserialize(_deserializer);
                 return true;
             }
         }

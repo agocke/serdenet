@@ -37,7 +37,8 @@ namespace Serde
 
     public interface IDeserializeEnumerable
     {
-        bool TryGetNext<T>(IDeserialize<T> deserialize, [MaybeNullWhen(false)] out T next);
+        bool TryGetNext<T, D>(D deserialize, [MaybeNullWhen(false)] out T next)
+            where D : IDeserialize<T>;
         int? SizeOpt { get; }
     }
 
